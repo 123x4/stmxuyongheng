@@ -25,6 +25,6 @@ int main(void)
 		
 		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET); // 灭
 		
-		Delay(100); 
+	
 	}
 }
