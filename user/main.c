@@ -10,6 +10,7 @@ int main(void)
 	GPIO_InitTypeDef GPIO_InitStruct;
 	
 	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_13;
+	
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
 	
