@@ -21,9 +21,7 @@ int main(void)
 	
 	while(1)
 	{
-		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET); // 亮
-		
-		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET); // 灭
+	
 		
 	
 	}
