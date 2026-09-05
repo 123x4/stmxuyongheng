@@ -1,0 +1,42 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "armcc5",
+            "displayName": "ARMCC 5 / Cortex-M3",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/armcc5",
+            "toolchainFile": "${sourceDir}/cmake/armcc5.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "armcc5",
+            "configurePreset": "armcc5"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "armcc5-full",
+            "displayName": "Configure and build STM32SX with ARMCC 5",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "armcc5"
+                },
+                {
+                    "type": "build",
+                    "name": "armcc5"
+                }
+            ]
+        }
+    ]
+}

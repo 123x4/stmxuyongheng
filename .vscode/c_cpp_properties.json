@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "ARMCC5",
+            "includePath": [
+                "${workspaceFolder}/std_periph_driver/inc",
+                "${workspaceFolder}/user",
+                "${workspaceFolder}/my_lib",
+                 "D:/Keil5/Core/ARM/ARMCC/include"
+            ],
+            "defines": [
+                "__CC_ARM",
+                "STM32F10X_MD",
+                "USE_STDPERIPH_DRIVER"
+            ],
+            "compilerPath": "",
+            "cStandard": "c99",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "windows-msvc-x86"
+        }
+    ],
+    "version": 4
+}

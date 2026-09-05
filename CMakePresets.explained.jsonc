@@ -1,0 +1,76 @@
+// 根对象开始；本文件是带注释的学习副本，CMake 实际读取 CMakePresets.json。
+{
+    // 指定 Presets 文件格式版本为 6，决定下面可以使用哪些字段。
+    "version": 6,
+
+    // 声明使用这些预设所需的最低 CMake 版本。
+    "cmakeMinimumRequired": {
+        // 最低版本的主版本号为 3。
+        "major": 3,
+        // 最低版本的次版本号为 20。
+        "minor": 20,
+        // 最低版本的补丁号为 0，三项合起来表示最低要求为 CMake 3.20.0。
+        "patch": 0
+    },
+
+    // 配置预设列表：描述 CMake 应怎样配置工程和生成构建规则。
+    "configurePresets": [
+        // 第一个配置预设对象开始。
+        {
+            // 预设的命令行名称，可通过 cmake --preset armcc5 选择它。
+            "name": "armcc5",
+            // 在 IDE 或预设列表中显示的易读名称。
+            "displayName": "ARMCC 5 / Cortex-M3",
+            // 指定 CMake 生成 Ninja 格式的构建规则。
+            "generator": "Ninja",
+            // 指定构建目录；${sourceDir} 会展开为工程根目录。
+            "binaryDir": "${sourceDir}/out/build/armcc5",
+            // 指定交叉编译工具链文件，用它选择 ARMCC、ARMASM 和 ARMLINK 等工具。
+            "toolchainFile": "${sourceDir}/cmake/armcc5.cmake",
+            // 设置写入 CMake 缓存的变量。
+            "cacheVariables": {
+                // 选择 Debug 构建类型，使 CMake 的 ARMCC 支持加入调试信息选项。
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+
+    // 构建预设列表：描述已经配置好的构建目录应怎样执行构建。
+    "buildPresets": [
+        // 第一个构建预设对象开始。
+        {
+            // 构建预设的命令行名称，可通过 cmake --build --preset armcc5 使用。
+            "name": "armcc5",
+            // 关联上面同名的配置预设，从中取得 binaryDir 等配置。
+            "configurePreset": "armcc5"
+        }
+    ],
+
+    // 工作流预设列表：把配置、构建等多个阶段组合成一条命令。
+    "workflowPresets": [
+        // 第一个工作流预设对象开始。
+        {
+            // 工作流命令行名称，可通过 cmake --workflow --preset armcc5-full 使用。
+            "name": "armcc5-full",
+            // 在 IDE 或预设列表中显示的易读名称。
+            "displayName": "Configure and build STM32SX with ARMCC 5",
+            // 定义工作流包含的步骤及其先后顺序。
+            "steps": [
+                // 第一步开始。
+                {
+                    // 第一步的类型为 configure，即读取工程并生成 Ninja 构建规则。
+                    "type": "configure",
+                    // 使用 configurePresets 中名为 armcc5 的配置预设。
+                    "name": "armcc5"
+                },
+                // 第二步开始。
+                {
+                    // 第二步的类型为 build，即让 Ninja 执行生成好的构建规则。
+                    "type": "build",
+                    // 使用 buildPresets 中名为 armcc5 的构建预设。
+                    "name": "armcc5"
+                }
+            ]
+        }
+    ]
+}

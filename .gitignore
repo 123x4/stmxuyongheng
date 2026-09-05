@@ -1,0 +1,10 @@
+# CMake and Ninja build output
+/out/
+/build/
+
+# Editor-local files
+/.vscode/settings.json
+
+# Operating-system files
+Thumbs.db
+.DS_Store

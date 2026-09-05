@@ -1,0 +1,2 @@
+cmake --workflow --preset armcc5-full
+STM32_Programmer_CLI -c port=SWD -w ".\out\build\armcc5\STM32SX.hex" -v -rst
