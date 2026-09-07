@@ -1,260 +1,112 @@
 #include "stm32f10x.h"
+#include "i2c.h"
+#include "si2c.h"
 
-void delay_us(uint32_t us);
+SI2C_TypeDef si2c;
 
-void My_SI2C_Init(void);
-
-void scl_write(uint8_t level);
-void sda_write(uint8_t level);
-
-uint8_t sda_read(void);
-
-void SendStart(void);
-void SendStop(void);
-
-uint8_t SendByte(uint8_t Byte);
-uint8_t ReceiveByte(uint8_t Ack);
-
-int My_SI2C_SendBytes(uint8_t Addr, uint8_t *pData, uint16_t Size);
-int My_SI2C_ReceiveBytes(uint8_t Addr, uint8_t *pBuffer, uint16_t Size);
+void My_I2C1_Init(void);
+void My_OnBoardLED_Init(void);
 
 int main(void)
 {
-	My_SI2C_Init();
+	// 硬件I2C的使用
+	// My_I2C1_Init();
+	// My_OnBoardLED_Init();
+	// uint8_t commands[] = {0x00, 0x8d, 0x14, 0xaf,0xa5};
+
+	// My_I2C_SendBytes(I2C1, 0x78, commands, 5);
+
+	// uint8_t rcvd;
+	
+	// My_I2C_ReceiveBytes(I2C1, 0x78, &rcvd, 1);
+	
+	// if((rcvd & (0x01 << 6)) == 0)
+	// {
+	// 	GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET);
+	// }
+	// else
+	// {
+	// 	GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
+	// }
+
+	// while(1)
+	// {
+	// }
+
+
+	// 软I2C的使用
+	si2c.SCL_GPIOx = GPIOB;
+	si2c.SCL_GPIO_Pin = GPIO_Pin_6;
+	si2c.SDA_GPIOx = GPIOB;
+	si2c.SDA_GPIO_Pin = GPIO_Pin_7;
+	My_SI2C_Init(&si2c);
+	
+	My_OnBoardLED_Init();
 	
 	uint8_t commands[] = {0x00, 0x8d, 0x14, 0xaf, 0xa5};
 	
-	My_SI2C_SendBytes(0x78, commands, 5);
+	My_SI2C_SendBytes(&si2c, 0x78, commands, 5);
+	
+	uint8_t rcvd;
+	
+	My_SI2C_ReceiveBytes(&si2c, 0x78, &rcvd, 1);
+	
+	if((rcvd & (0x01 << 6)) == 0)
+	{
+		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_RESET);
+	}
+	else
+	{
+		GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
+	}
 	
 	while(1)
 	{
 	}
+
 }
 
-void delay_us(uint32_t us)
+void My_I2C1_Init(void)
 {
-	uint32_t n = us * 8;
-	
-	for(uint32_t i=0; i<n; i++);
+	// 初始化PB6和PB7为I2C1的SCL和SDA引脚
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+
+	// 初始化I2C1
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+	// 复位
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, ENABLE);
+	// 取消复位
+	RCC_APB1PeriphResetCmd(RCC_APB1Periph_I2C1, DISABLE);
+
+	I2C_InitTypeDef I2C_InitStructure;
+	I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
+	I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
+	I2C_InitStructure.I2C_ClockSpeed = 400000; // 400kHz
+	I2C_Init(I2C1, &I2C_InitStructure);
+
+	I2C_Cmd(I2C1, ENABLE); // 使能I2C1
 }
 
-//初始化PA0和PA1为开漏输出模式，作为I2C的SCL和SDA
-void My_SI2C_Init(void)
+
+void My_OnBoardLED_Init(void)
 {
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 	
 	GPIO_InitTypeDef GPIO_InitStruct;
-	
-	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_13;
 	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_OD;
 	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_2MHz;
 	
-	GPIO_Init(GPIOA, &GPIO_InitStruct);
+	GPIO_Init(GPIOC, &GPIO_InitStruct);
 	
-	GPIO_WriteBit(GPIOA, GPIO_Pin_0, Bit_SET);
-	GPIO_WriteBit(GPIOA, GPIO_Pin_1, Bit_SET);
+	GPIO_WriteBit(GPIOC, GPIO_Pin_13, Bit_SET);
 }
-// 向SCL写0和1来控制高低电平
-void scl_write(uint8_t level)
-{
-	// PA0
-	if(level == 0)
-	{
-		GPIO_WriteBit(GPIOA, GPIO_Pin_0, Bit_RESET);
-	}
-	else
-	{
-		GPIO_WriteBit(GPIOA, GPIO_Pin_0, Bit_SET);
-	}
-}
-// 向SDA写0和1来传输数据
-void sda_write(uint8_t level)
-{
-	// PA1
-	if(level == 0)
-	{
-		GPIO_WriteBit(GPIOA, GPIO_Pin_1, Bit_RESET);
-	}
-	else
-	{
-		GPIO_WriteBit(GPIOA, GPIO_Pin_1, Bit_SET);
-	}	
-}
-
-uint8_t sda_read(void)
-{
-	if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1) == Bit_SET)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-// 发送起始位
-void SendStart(void)
-{
-	sda_write(0);
-	delay_us(1);
-}
-// 发送停止位
-void SendStop(void)
-{
-	// SCL为低电平时才允许SDA去写
-	scl_write(0);
-	// SCL拉低后，SDA拉低
-	sda_write(0);
-	delay_us(1);
-	
-	// 拉高SCL
-	scl_write(1);
-	delay_us(1);
-	
-	// SCL高电平期间，SDA拉高
-	sda_write(1);
-	delay_us(1);
-}
-
-uint8_t SendByte(uint8_t Byte)
-{
-	for(int8_t i=7; i>=0; i--)
-	{
-		scl_write(0);
-		if((Byte & (0x01 << i)) != 0)
-		{
-			sda_write(1);
-		}
-		else
-		{
-			sda_write(0);
-		}
-		delay_us(1);
-		scl_write(1);
-		delay_us(1);
-	}
-	
-	// 读取ACK或者NAK
-	scl_write(0);
-	sda_write(1);
-	delay_us(1);
-	scl_write(1);
-	delay_us(1);
-	return sda_read();
-}
-
-uint8_t ReceiveByte(uint8_t Ack)
-{
-	uint8_t byte = 0;
-	
-	for(int8_t i=7; i>=0; i--)
-	{
-		scl_write(0);
-		sda_write(1);
-		delay_us(1);
-		scl_write(1);
-		delay_us(1);
-		
-		if(sda_read() != 0)
-		{
-			byte |= (0x01 << i);
-		}
-	}
-	
-	scl_write(0);
-	sda_write(!Ack);
-	delay_us(1);
-	scl_write(1);
-	delay_us(1);
-	
-	return byte;
-}
-
-
-int My_SI2C_SendBytes(uint8_t Addr, uint8_t *pData, uint16_t Size)
-{
-	SendStart();
-	
-	if(SendByte(Addr & 0xfe) != 0)
-	{
-		SendStop();
-		return -1;
-	}
-	
-	for(uint32_t i=0; i<Size; i++)
-	{
-		if(SendByte(pData[i]) != 0)
-		{
-			SendStop();
-			return -2;
-		}
-	}
-	
-	SendStop();
-	
-	return 0;
-}
-
-
-int My_SI2C_ReceiveBytes(uint8_t Addr, uint8_t *pBuffer, uint16_t Size)
-{
-	SendStart();
-	
-	if(SendByte(Addr | 0x01) != 0)
-	{
-		SendStop();
-		return -1;
-	}
-	
-	for(uint32_t i=0; i<Size-1; i++)
-	{
-	 	pBuffer[i] = ReceiveByte(1);
-	}
-	
-	pBuffer[Size-1] = ReceiveByte(0);
-	
-	SendStop();
-	return 0;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

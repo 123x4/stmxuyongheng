@@ -16,6 +16,8 @@ set(FIRMWARE_SOURCES
     user/stm32f10x_it.c
     # 延时函数及系统节拍变量的实现。
     my_lib/delay.c
+    my_lib/i2c.c
+    my_lib/si2c.c
     # RCC 标准外设驱动，为时钟配置函数提供实现。
     std_periph_driver/src/stm32f10x_rcc.c
     # GPIO 标准外设驱动，为 GPIO 配置和读写函数提供实现。
