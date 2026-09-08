@@ -6,6 +6,7 @@
                 "${workspaceFolder}/std_periph_driver/inc",
                 "${workspaceFolder}/user",
                 "${workspaceFolder}/my_lib",
+                "${workspaceFolder}/my_lib/font/.h",
                  "D:/Keil5/Core/ARM/ARMCC/include"
             ],
             "defines": [

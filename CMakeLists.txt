@@ -18,6 +18,7 @@ set(FIRMWARE_SOURCES
     my_lib/delay.c
     my_lib/i2c.c
     my_lib/si2c.c
+    my_lib/oled.c
     # RCC 标准外设驱动，为时钟配置函数提供实现。
     std_periph_driver/src/stm32f10x_rcc.c
     # GPIO 标准外设驱动，为 GPIO 配置和读写函数提供实现。
@@ -42,6 +43,7 @@ target_include_directories(STM32SX PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/user
     # 自定义 delay.h 等头文件所在目录。
     ${CMAKE_CURRENT_SOURCE_DIR}/my_lib
+    ${CMAKE_CURRENT_SOURCE_DIR}/my_lib/font/.h
 )
 
 # 为 STM32SX 的源文件添加预处理宏定义。
